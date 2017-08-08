@@ -1,0 +1,15 @@
+#Aim: To test the overhead of the sync log at different locations
+
+Procedure To Test:
+1) Test with commenting the line in db/log_writer.h for only disk:
+   myservice.post(boost::bind(send_over_kafka, true))
+   myservice.post(boost::bind(send_over_nfs, true))
+
+2) For running with kafka make sure to uncomment the line below:
+   myservice.post(boost::bind(send_over_kafka, true))
+
+   Also make sure to run the kafka and change the config variable server ip
+
+
+To compile:
+g++ sync_wal_overhead_testing.cpp -osync_wal_overhead_testing ../librocksdb.a -I../include -O2 -std=c++11 -lpthread -lrt -lsnappy -lgflags -lz -lbz2 -lzstd -lnuma -std=c++11  -DROCKSDB_PLATFORM_POSIX -DROCKSDB_LIB_IO_POSIX  -DOS_LINUX -fno-builtin-memcmp -DROCKSDB_FALLOCATE_PRESENT -DSNAPPY -DGFLAGS=gflags -DZLIB -DBZIP2 -DZSTD -DNUMA -DROCKSDB_MALLOC_USABLE_SIZE -DROCKSDB_PTHREAD_ADAPTIVE_MUTEX -DROCKSDB_BACKTRACE -DROCKSDB_RANGESYNC_PRESENT -DROCKSDB_SCHED_GETCPU_PRESENT -march=native  -DROCKSDB_SUPPORT_THREAD_LOCAL    -lpthread -lboost_system -lboost_thread -lstdc++fs -lboost_filesystem -lboost_system -lboost_program_options -lrdkafka++ -lcppkafka -L/cppkafka/build/lib/

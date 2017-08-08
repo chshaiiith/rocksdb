@@ -1,0 +1,9 @@
+Aim: To test the dymanic backup
+
+Configuration: Change the following directories:
+
+1. WAL directory: default: /tmp/chetan/
+2. Database directory: default: /tmp/testing_db_1
+3. Backup directory: default: /tmp/own_backup_8
+
+

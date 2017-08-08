@@ -1,0 +1,7 @@
+Aim: To restore backup from the backup number using softlink or the hardlink if the data is available on the same server
+
+Configurable variables: 
+1. restore directory: default: /tmp/backup_restore
+2. backup directory: default: /tmp/own_backup_1/
+
+
