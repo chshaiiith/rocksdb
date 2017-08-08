@@ -1,9 +1,7 @@
 //  Copyright (c) 2011-present, Facebook, Inc.  All rights reserved.
-//  This source code is licensed under the BSD-style license found in the
-//  LICENSE file in the root directory of this source tree. An additional grant
-//  of patent rights can be found in the PATENTS file in the same directory.
-//  This source code is also licensed under the GPLv2 license found in the
-//  COPYING file in the root directory of this source tree.
+//  This source code is licensed under both the GPLv2 (found in the
+//  COPYING file in the root directory) and Apache 2.0 License
+//  (found in the LICENSE.Apache file in the root directory).
 //
 // Copyright (c) 2011 The LevelDB Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -256,6 +254,13 @@ class BackupEngine {
   static Status Open(Env* db_env,
                      const BackupableDBOptions& options,
                      BackupEngine** backup_engine_ptr);
+  
+  
+  // XXX:Customised method to calculate the checksum (added by Chetan Sharma)
+  static Status myCheckSum(const std::string& src, Env* src_env,                                              
+                            uint64_t size_limit,                                                              
+                            uint32_t* checksum_value);                                                        
+
 
   // same as CreateNewBackup, but stores extra application metadata
   // Flush will always trigger if 2PC is enabled.

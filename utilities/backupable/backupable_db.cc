@@ -1,9 +1,7 @@
 //  Copyright (c) 2011-present, Facebook, Inc.  All rights reserved.
-//  This source code is licensed under the BSD-style license found in the
-//  LICENSE file in the root directory of this source tree. An additional grant
-//  of patent rights can be found in the PATENTS file in the same directory.
-//  This source code is also licensed under the GPLv2 license found in the
-//  COPYING file in the root directory of this source tree.
+//  This source code is licensed under both the GPLv2 (found in the
+//  COPYING file in the root directory) and Apache 2.0 License
+//  (found in the LICENSE.Apache file in the root directory).
 //
 // Copyright (c) 2011 The LevelDB Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -491,6 +489,52 @@ Status BackupEngine::Open(Env* env, const BackupableDBOptions& options,
   *backup_engine_ptr = backup_engine.release();
   return Status::OK();
 }
+
+                                                                                                              
+// XXX: Customized function (Added by Chetan Sharma)
+Status BackupEngine::myCheckSum(const std::string& src, Env* src_env,                                         
+                                uint64_t size_limit,                                                          
+                                uint32_t* checksum_value) {                                                   
+                                                                                                              
+  size_t kDefaultCopyFileBufferSize = 5 * 1024 * 1024LL;                                                      
+  *checksum_value = 0;                                                                                        
+  if (size_limit == 0) {                                                                                      
+    size_limit = std::numeric_limits<uint64_t>::max();                                                        
+  }                                                                                                           
+                                                                                                              
+  EnvOptions env_options;                                                                                     
+  env_options.use_mmap_writes = false;                                                                        
+  env_options.use_direct_reads = false;                                                                       
+                                                                                                              
+  std::unique_ptr<SequentialFile> src_file;                                                                   
+  Status s = src_env->NewSequentialFile(src, &src_file, env_options);                                         
+  if (!s.ok()) {                                                                                              
+    return s;                                                                                                 
+  }                                                                                                           
+                                                                                                              
+  unique_ptr<SequentialFileReader> src_reader(                                                                
+      new SequentialFileReader(std::move(src_file)));                                                         
+  std::unique_ptr<char[]> buf(new char[kDefaultCopyFileBufferSize]);                                          
+  Slice data;                                                                                                 
+                                                                                                              
+  do {                                                                                                        
+    size_t buffer_to_read = (kDefaultCopyFileBufferSize < size_limit) ?                                       
+      kDefaultCopyFileBufferSize : size_limit;                                                                
+    s = src_reader->Read(buffer_to_read, &data, buf.get());                                                   
+                                                                                                              
+    if (!s.ok()) {                                                                                            
+      return s;                                                                                               
+    }                                                                                                         
+                                                                                                              
+    size_limit -= data.size();                                                                                
+    *checksum_value = crc32c::Extend(*checksum_value, data.data(), data.size());                              
+  } while (data.size() > 0 && size_limit > 0);                                                                
+                                                                                                              
+  return s;                                                                                                   
+}                                                                                                             
+
+
+
 
 BackupEngineImpl::BackupEngineImpl(Env* db_env,
                                    const BackupableDBOptions& options,
