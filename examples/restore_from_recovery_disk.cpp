@@ -11,6 +11,7 @@
 #include <ratio>
 #include <chrono>
 #include <fstream>
+#include <vector>
 
 #include "rocksdb/db.h"
 #include "rocksdb/utilities/backupable_db.h"
@@ -21,6 +22,59 @@ namespace fs = std::experimental::filesystem;
 using namespace rocksdb;
 using namespace std;
 using namespace std::chrono;
+
+vector<string> get_bakup_number_and_logs(std::string date, std::string time) {
+    std::string line;
+    ifstream file;
+    file.open("META");
+    string prev_backup = "";
+    vector<string> data;
+    while (getline(file, line)) {
+        std::vector<std::string> strs;
+        boost::split(strs, line, boost::is_any_of(" "));
+
+        // Just incase if there is any garbage
+        if (strs.size() < 3) {
+            cout << "No backup found to recover\n";
+        }
+	if (date > strs.at(0)) {
+	    prev_backup = line;
+	    continue;
+        } 
+        
+        if (date == strs.at(0)) {
+            if (time > strs.at(1)) {
+		prev_backup = line;
+		continue;
+            }
+            if (prev_backup == "") {
+                cout << "Backup not available";
+	        return data;
+	    } else {
+		std::vector<std::string> strs1;
+                boost::split(strs1, prev_backup, boost::is_any_of(" "));
+		data.push_back(strs1.at(3));
+		
+		std::vector<std::string> strs2;
+		cout << strs1.at(4) <<"\n";
+		boost::split(strs2, strs1.at(4), boost::is_any_of(":"));
+
+		for(std::vector<string>::iterator it = strs2.begin(); it != strs2.end(); ++it) {
+		    if (*it != "") {
+			cout << *it + "\n";
+			data.push_back(*it);
+		    }
+		}
+		return data;
+	    }
+	} else {
+            cout << "Backup not available";
+	    return data;
+	}
+    }
+    return data;
+
+}
 
 void get_all_required_files(std::string s, std::string backup_number, vector<fs::path> &files,
                             vector<std::string> &checkSum, int &manNumber) {
@@ -47,10 +101,10 @@ void get_all_required_files(std::string s, std::string backup_number, vector<fs:
             continue;
         }
 
-        if (strs.at(0).find("MANIFEST")) {
-            manNumber = files.size();
+  //      if (strs.at(0) > ) {
+  //          manNumber = files.size();
         //  cout << manNumber;
-        }
+  //      }
         fs::path p(s + strs.at(0));
         files.push_back(p);
         checkSum.push_back(strs.at(2));
@@ -62,10 +116,24 @@ void get_all_required_files(std::string s, std::string backup_number, vector<fs:
 
 int main() {
 
-    std::string s = "/tmp/own_backup_1/";
-    std::string backup_number;
+   // XXX: customize the backup t
+    std::string s = "/tmp/own_backup_8/";
+  /*  std::string backup_number;
     cout << "Insert backup number: \n";
     std::cin >> backup_number;
+*/
+    std::string time_to_restore;
+    std::string data_to_restore;
+    cout << "Enter the time you want to restore";
+    std::cin >> data_to_restore >> time_to_restore;
+    vector<string> info = get_bakup_number_and_logs(data_to_restore, time_to_restore);
+    std::string backup_number = info.at(0);
+    for(std::vector<string>::iterator it = info.begin(); it != info.end(); ++it) {
+        if (*it != "") {
+            cout << *it + "\n";
+        }
+     }
+
 
     time_t result = std::time(nullptr);
     cout << "Time to restore backup starts: ";
@@ -75,6 +143,7 @@ int main() {
     vector<fs::path> files;
     vector<std::string> checkSum;
     int manNumber = 0;
+ 
     get_all_required_files(s, backup_number, files, checkSum, manNumber);
     // delete if directory exists 
     std::string restore_dir = "/tmp/backup_restore"; // + std::to_string(i);   
@@ -111,7 +180,7 @@ int main() {
     Status stat = DB::Open(options, restore_dir, &db);
     assert(stat.ok());
     delete db;
-/*  std::string value;                                                                              
+ /*  std::string value;                                                                              
     stat = db->Get(rocksdb::ReadOptions(), "key1", &value);
     cout << value;
 */                                                                                                                                                                                                           
@@ -123,7 +192,7 @@ int main() {
 
     cout << "\n";
     cout << "total time with high resolution clock is : " << time_span.count() << "\n";
-//}
+//} 
 /*  BackupEngineReadOnly* backup_engine;
     stat = BackupEngineReadOnly::Open(Env::Default(), BackupableDBOptions(s), &backup_engine);
     assert(stat.ok());
@@ -135,7 +204,7 @@ int main() {
 
     cout << "total normal time with high resolution clock is : " << time_span.count() << "\n";
 
-
+*/
 //  std::ofstream outfile;
 //  outfile.open("results.txt", std::ios_base::app);
 
@@ -144,7 +213,7 @@ int main() {
 //    outfile << time_span.count();
 //    outfile << "\n";
  //   delete db;
-*/
+
     return 0;
 }
 
