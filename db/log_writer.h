@@ -75,7 +75,7 @@ class Writer {
   // "*dest" must be initially empty.
   // "*dest" must remain live while this Writer is in use.
   explicit Writer(unique_ptr<WritableFileWriter>&& dest,
-                  uint64_t log_number, bool recycle_log_files);
+                  uint64_t log_number, bool recycle_log_files, bool manual_flush_=false);
   ~Writer();
 
   Status AddRecord(const Slice& slice);

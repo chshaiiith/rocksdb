@@ -71,7 +71,7 @@ void dynamic_backup(DB *db, int timeToWait) {
         cout << "\n";
 
         // write in file backup number and time to take that backup
-        string path = "/tmp/chetan/archive1";
+        string path = "/tmp/chetan/archive/";
         if (boost::filesystem::is_directory(path) == false) {
             std::cout << "Log directory path is wrong";
             return;
@@ -117,11 +117,11 @@ DB_Instance::DB_Instance(bool random) {
 	// Options configurations
 //	std::cout << "Reached here " << std::flush;
 	options.create_if_missing = true;
-	options.wal_dir = "/tmp/chetan1/";
+	options.wal_dir = "/tmp/chetan";
 	options.WAL_ttl_seconds = 24 * 60 * 60;
 	options.WAL_size_limit_MB = 4000;
 	// Mention the db folder in which data is stored
-	Status s = DB::Open(options, "/export/home/grads/cks5338/rocksdb/examples/database1", &db);
+	Status s = DB::Open(options, "/export/home/grads/cks5338/rocksdb/examples/database", &db);
 	assert(s.ok());
 
 	// Specifying the write option	

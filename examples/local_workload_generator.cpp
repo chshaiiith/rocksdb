@@ -101,7 +101,7 @@ int make_curl_call(string postthis_, string url) {
 
 int main() {
 	// Few variable intialization
-    	long count = 4000000;
+    	long count = 1000001;
     	string key;
     	string value, out, url;
     	std::time_t result;
@@ -194,7 +194,7 @@ int main() {
 			}
 
 			else {
-				key = "key" + std::to_string(count);
+				key = "key0" + std::to_string(count);
 				value = generate_string(size - 6);
 				
 //				auto begin = std::chrono::high_resolution_clock::now();
