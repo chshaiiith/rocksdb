@@ -14,7 +14,8 @@
 #include "util/coding.h"
 #include "util/crc32c.h"
 #include "util/file_reader_writer.h"
-
+#include <iostream>
+#include <fstream>
 
 // XXX: My added libraries for kafka
 #include "cppkafka/producer.h"
@@ -27,6 +28,7 @@
 
 // XXX: Namespace
 using namespace cppkafka;
+using namespace std;
 
 using cppkafka::Producer;
 using cppkafka::Configuration;
@@ -41,36 +43,36 @@ boost::asio::io_service::work work(myservice);
 boost::thread_group threadpool;
 
 // For NFS file to write
-std::ofstream outfile ("/tmp/rocks_backup/LOG_FILE", ios::out | ios::app | ios::binary);
+/*std::ofstream outfile ("/tmp/rocks_backup/LOG_FILE", ios::out | ios::app | ios::binary);
 
 Configuration config = {
-    { "metadata.broker.list", "mdbsrv02.almaden.ibm.com:9092" },
+    { "metadata.broker.list", "cse-bacheli02.cse.psu.edu:9092" },
     { "group.id", 1 },
+	{ "acks", 1}
 };
 
 MessageBuilder builder("test");
 
 Producer producer(config);
-
+*/
 std::atomic<bool> ready (false);
 
 const char *new_buf;
 const char *new_ptr;
 size_t new_header_size;
 size_t new_n;
-
+/*
 void send_over_nfs(bool ran) {
     // Sending the data over the NFS
-    outfile << std::string(new_buff, new_header_size);
+    outfile << std::string(new_buf, new_header_size);
     outfile << std::string(new_ptr, new_n);
-    outfile.flush()
+    outfile.flush();
 
     ready = false;
     return;
 
-} 
-
-
+} */
+/*
 void send_over_kafka(bool ran) {
     //Sending data over the kafka
     std::string s;
@@ -87,17 +89,17 @@ void send_over_kafka(bool ran) {
 //     }
        return;
 }
-
+*/
 
 
 
 Writer::Writer(unique_ptr<WritableFileWriter>&& dest, uint64_t log_number,
-               bool recycle_log_files, bool manual_flush)
+               bool recycle_log_files)
     : dest_(std::move(dest)),
       block_offset_(0),
       log_number_(log_number),
-      recycle_log_files_(recycle_log_files),
-      manual_flush_(manual_flush) {
+      recycle_log_files_(recycle_log_files) {
+ //     manual_flush_(manual_flush) {
   for (int i = 0; i <= kMaxRecordType; i++) {
     char t = static_cast<char>(i);
     type_crc_[i] = crc32c::Value(&t, 1);
@@ -207,7 +209,7 @@ Status Writer::EmitPhysicalRecord(RecordType t, const char* ptr, size_t n) {
 
  // XXX: For switching between the kafka and the NFS
  // Comment the next line and uncomment the after line
-  myservice.post(boost::bind(send_over_kafka, true));
+//  myservice.post(boost::bind(send_over_kafka, true));
   
   // myservice.post(boost::bind(send_over_nfs, true));
 
@@ -221,17 +223,17 @@ Status Writer::EmitPhysicalRecord(RecordType t, const char* ptr, size_t n) {
   if (s.ok()) {
     s = dest_->Append(Slice(ptr, n));
     if (s.ok()) {
-      if (!manual_flush_) {
+     if (!manual_flush_) {
         s = dest_->Flush();
-      }
+     }
     }
   }
   block_offset_ += header_size + n;
 
   //XXX: Do the changes
-  while(ready) {
+//  while(ready) {
   //std::cout << "stuck here";
-  };
+//  };
 
   return s;
 }

@@ -30,7 +30,7 @@ bool take_backup(int timeToSleep) {
 
 void dynamic_backup(DB *db, int timeToWait) {
 
-   // XXX: ToDo:: Read a file to maintain the version numbers 
+	// XXX: ToDo:: Read a file to maintain the version numbers 
     Status s;
     std::time_t result;
 
@@ -85,6 +85,7 @@ int main() {
     std::time_t result;
 
     while (1) {
+   
        cout << "Number of insert operations: ";
        int num, size;
        scanf("%d", &num);
@@ -110,5 +111,3 @@ int main() {
     }
 
 }
-
-

@@ -79,17 +79,19 @@ class Writer {
   ~Writer();
 
   Status AddRecord(const Slice& slice);
-
+  Status WriteBuffer();
   WritableFileWriter* file() { return dest_.get(); }
   const WritableFileWriter* file() const { return dest_.get(); }
 
   uint64_t get_log_number() const { return log_number_; }
+
 
  private:
   unique_ptr<WritableFileWriter> dest_;
   size_t block_offset_;       // Current offset in block
   uint64_t log_number_;
   bool recycle_log_files_;
+  bool manual_flush_;
 
   // crc32c values for all supported record types.  These are
   // pre-computed to reduce the overhead of computing the crc of the
