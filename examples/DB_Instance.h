@@ -30,6 +30,7 @@
 using namespace rocksdb;
 using namespace std;
 
+void dynamic_backup(DB* db, int timeToWait);
 
 class DB_Instance
 {
@@ -37,6 +38,7 @@ public:
     DB_Instance(bool random);
 	Options options;
 	DB* db;
+	int timeToWait;
 
 	rocksdb::WriteOptions write_options;
 

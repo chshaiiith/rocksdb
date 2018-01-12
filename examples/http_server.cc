@@ -154,6 +154,7 @@ class MyHandler : public Http::Handler {
 				std::string body = req.body();
 				std::vector<std::string> temp = split(body, ':');
 				_dbInstance->db_put(temp[0], temp[1]);
+//				cout << "reached here\n";
 				response.send(Http::Code::Ok);
 			}
 			else {
@@ -209,12 +210,18 @@ int main(int argc, char *argv[]) {
     Address addr(Ipv4::any(), port);
     static constexpr size_t Workers = 4;
 
-	_dbInstance = new DB_Instance(true);
-	
-    cout << "Cores = " << hardware_concurrency() << endl;
+		
+    
+	cout << "Cores = " << hardware_concurrency() << endl;
     cout << "Using " << thr << " threads" << endl;
 
-    auto server = std::make_shared<Http::Endpoint>(addr);
+	_dbInstance = new DB_Instance(true);
+	// Backup thread     
+//	std::thread t1(dynamic_backup, _dbInstance->db, _dbInstance->timeToWait);
+
+	cout << "Can start operation now\n" << std::flush;	
+	
+	auto server = std::make_shared<Http::Endpoint>(addr);
 
     auto opts = Http::Endpoint::options()
         .threads(thr)

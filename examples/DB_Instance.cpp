@@ -37,20 +37,37 @@ void dynamic_backup(DB *db, int timeToWait) {
     Status s;
     std::time_t result;
 
-    BackupEngine* backup_engine;
-    s = BackupEngine::Open(Env::Default(), BackupableDBOptions("/tmp/own_backup_8"), &backup_engine);
-    assert(s.ok());
 
     string startTime;
     int backupNumber;
     string logFileString;
     map<string,bool>::const_iterator it;
     string fileName;
+    
+	BackupEngine* backup_engine;
+    s = BackupEngine::Open(Env::Default(), BackupableDBOptions("/nfs/general/backup"), &backup_engine);
+    assert(s.ok());
+	
+	result = std::time(nullptr);
+    cout << "Started taking backup at : ";
+    startTime = std::asctime(std::localtime(&result));
+	
+	s = backup_engine->CreateNewBackup(db, true);
+	assert(s.ok());
 
-    while (1) {
+    result = std::time(nullptr);
+    cout << "Taking backup finished at : ";
+    cout << std::asctime(std::localtime(&result));
+    int total_count = 0
+	while (total_count < 2) {
         while (take_backup(timeToWait) == false);
 
-        result = std::time(nullptr);
+		
+//		BackupEngine* backup_engine;
+//		s = BackupEngine::Open(Env::Default(), BackupableDBOptions("/nfs/general/backup"), &backup_engine);
+//		assert(s.ok());
+        
+		result = std::time(nullptr);
         cout << "Started taking backup at : ";
         startTime = std::asctime(std::localtime(&result));
 
@@ -106,33 +123,33 @@ void dynamic_backup(DB *db, int timeToWait) {
         outfile.open("META", std::ios_base::app);
         outfile << " " + std::to_string(backupNumber) + " " + logFileString + "\n";
         outfile.close();
+		total_count ++;
      }
 
 }
 
 
-
 DB_Instance::DB_Instance(bool random) {
 	
 	// Options configurations
-//	std::cout << "Reached here " << std::flush;
+	std::cout << "Reached here " << std::flush;
 	options.create_if_missing = true;
 	options.wal_dir = "/tmp/chetan";
 	options.WAL_ttl_seconds = 24 * 60 * 60;
 	options.WAL_size_limit_MB = 4000;
 	// Mention the db folder in which data is stored
-	Status s = DB::Open(options, "/export/home/grads/cks5338/rocksdb/examples/database", &db);
-	assert(s.ok());
 
 	// Specifying the write option	
-//	write_options.sync = true;
+	write_options.sync = true;
 
 	// Mentiones the time to take backup : UserInput
 	cout << "Time to wait before backup: ";
-	int timeTowait;
-	scanf("%d", &timeTowait);
+	scanf("%d", &timeToWait);
+
+	Status s = DB::Open(options, "/tmp/database", &db);
+	assert(s.ok());
 	
-//	std::thread t1(dynamic_backup, db, timeTowait);
+	return;
 
 }
 

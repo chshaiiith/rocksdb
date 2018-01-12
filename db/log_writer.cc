@@ -43,7 +43,7 @@ boost::asio::io_service::work work(myservice);
 boost::thread_group threadpool;
 
 // For NFS file to write
-/*std::ofstream outfile ("/tmp/rocks_backup/LOG_FILE", ios::out | ios::app | ios::binary);
+std::ofstream outfile ("/tmp/rocks_backup/LOG_FILE", ios::out | ios::app | ios::binary);
 
 Configuration config = {
     { "metadata.broker.list", "cse-bacheli02.cse.psu.edu:9092" },
@@ -54,7 +54,7 @@ Configuration config = {
 MessageBuilder builder("test");
 
 Producer producer(config);
-*/
+
 std::atomic<bool> ready (false);
 
 const char *new_buf;
@@ -72,24 +72,17 @@ void send_over_nfs(bool ran) {
     return;
 
 } */
-/*
+
 void send_over_kafka(bool ran) {
     //Sending data over the kafka
     std::string s;
-  //  std::cout << "ASdasdasdas" << std::flush;
-//    while(true) {
-               //Waiting for new data
-//             while(ready ==false);
-               s = std::string(new_buf, new_header_size) + std::string(new_ptr, new_n);
-               builder.payload(s);
-               producer.produce(builder);
-//             producer.flush();
-        ready = false;
-  //      std::cout << "readyasdjghfkl;'jhgfdhjkl/jhgfj,.j;lkasjgdhjshdaganmj.sfhgasmjd.fhghmsahsjdhfgmshjdhfgshjiwedshfgmfsjhfgmsjhfgmsfjhfsg" << std::flush;
-//     }
-       return;
+    s = std::string(new_buf, new_header_size) + std::string(new_ptr, new_n);
+	builder.payload(s);
+    producer.produce(builder);
+	ready = false;
+    return;
 }
-*/
+
 
 
 
@@ -209,7 +202,7 @@ Status Writer::EmitPhysicalRecord(RecordType t, const char* ptr, size_t n) {
 
  // XXX: For switching between the kafka and the NFS
  // Comment the next line and uncomment the after line
-//  myservice.post(boost::bind(send_over_kafka, true));
+  myservice.post(boost::bind(send_over_kafka, true));
   
   // myservice.post(boost::bind(send_over_nfs, true));
 
@@ -231,9 +224,9 @@ Status Writer::EmitPhysicalRecord(RecordType t, const char* ptr, size_t n) {
   block_offset_ += header_size + n;
 
   //XXX: Do the changes
-//  while(ready) {
-  //std::cout << "stuck here";
-//  };
+  while(ready) {
+//	std::cout << "stuck here";
+  };
 
   return s;
 }
