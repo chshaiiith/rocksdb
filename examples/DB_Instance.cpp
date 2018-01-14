@@ -32,63 +32,61 @@ bool take_backup(int timeToSleep) {
 std::ofstream outfile;
 
 void dynamic_backup(DB *db, int timeToWait) {
-
-    // XXX: ToDo:: Read a file to maintain the version numbers 
     Status s;
     std::time_t result;
 
-
-    string startTime;
     int backupNumber;
     string logFileString;
     map<string,bool>::const_iterator it;
     string fileName;
-    
+
+	cout << "Creating backupable engine :";
+	result = std::time(nullptr);
+    cout <<  std::asctime(std::localtime(&result)) << "\n";	
+
 	BackupEngine* backup_engine;
     s = BackupEngine::Open(Env::Default(), BackupableDBOptions("/nfs/general/backup"), &backup_engine);
     assert(s.ok());
-	
+
 	result = std::time(nullptr);
     cout << "Started taking backup at : ";
-    startTime = std::asctime(std::localtime(&result));
-	
+    cout <<  std::asctime(std::localtime(&result));
+	cout << "\n";
 	s = backup_engine->CreateNewBackup(db, true);
 	assert(s.ok());
 
     result = std::time(nullptr);
     cout << "Taking backup finished at : ";
     cout << std::asctime(std::localtime(&result));
-    int total_count = 0
-	while (total_count < 2) {
+	cout << "\n";
+
+	cout << "Can start operation now\n" << std::flush;	
+	
+	while(1) {
         while (take_backup(timeToWait) == false);
 
-		
-//		BackupEngine* backup_engine;
-//		s = BackupEngine::Open(Env::Default(), BackupableDBOptions("/nfs/general/backup"), &backup_engine);
-//		assert(s.ok());
-        
 		result = std::time(nullptr);
         cout << "Started taking backup at : ";
-        startTime = std::asctime(std::localtime(&result));
+        cout << std::asctime(std::localtime(&result));
+		cout << "\n";		
 
-        char buff[DTTMSZ];
+/*        char buff[DTTMSZ];
         outfile.open("META", std::ios_base::app);
         outfile << getDtTm (buff);
         outfile.close();
 
         cout << std::asctime(std::localtime(&result));
         cout << "\n";
-        s = backup_engine->CreateNewBackup(db, true /* with flush*/);
+*/      s = backup_engine->CreateNewBackup(db, true /* with flush*/);
         assert(s.ok());
 
         result = std::time(nullptr);
         cout << "Taking backup finished at : ";
         cout << std::asctime(std::localtime(&result));
-
         cout << "\n";
 
         // write in file backup number and time to take that backup
-        string path = "/tmp/chetan/archive/";
+/*        string path = "/tmp/chetan/archive/";
         if (boost::filesystem::is_directory(path) == false) {
             std::cout << "Log directory path is wrong";
             return;
@@ -123,8 +121,7 @@ void dynamic_backup(DB *db, int timeToWait) {
         outfile.open("META", std::ios_base::app);
         outfile << " " + std::to_string(backupNumber) + " " + logFileString + "\n";
         outfile.close();
-		total_count ++;
-     }
+*/     }
 
 }
 
@@ -132,7 +129,6 @@ void dynamic_backup(DB *db, int timeToWait) {
 DB_Instance::DB_Instance(bool random) {
 	
 	// Options configurations
-	std::cout << "Reached here " << std::flush;
 	options.create_if_missing = true;
 	options.wal_dir = "/tmp/chetan";
 	options.WAL_ttl_seconds = 24 * 60 * 60;
