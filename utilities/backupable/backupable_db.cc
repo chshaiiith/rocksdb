@@ -1253,8 +1253,12 @@ Status BackupEngineImpl::CopyOrCreateFile(
       *size += data.size();
     }
     if (checksum_value != nullptr) {
-      *checksum_value =
-          crc32c::Extend(*checksum_value, data.data(), data.size());
+
+//	XXX: Done by Chetan Sharma to completely stop calculating checksum
+//      *checksum_value =
+//          crc32c::Extend(*checksum_value, data.data(), data.size());
+
+		*checksum_value = 0;
     }
     s = dest_writer->Append(data);
     if (rate_limiter != nullptr) {
@@ -1397,6 +1401,8 @@ Status BackupEngineImpl::CalculateChecksum(const std::string& src, Env* src_env,
                                            uint64_t size_limit,
                                            uint32_t* checksum_value) {
   *checksum_value = 0;
+  return Status::OK();
+
   if (size_limit == 0) {
     size_limit = std::numeric_limits<uint64_t>::max();
   }
