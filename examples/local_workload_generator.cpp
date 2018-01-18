@@ -62,7 +62,8 @@ string generate_string(int byte_size) {
 string get_random_key(long count) {
 	srand (time(NULL));
 	int random = rand() % count;
-	return "key" + random;
+	return "key" + std::to_string(random);
+
 }
 
  
@@ -101,7 +102,7 @@ int make_curl_call(string postthis_, string url) {
 
 int main() {
 	// Few variable intialization
-    	long count = 1000001;
+    	long count = 0;
     	string key;
     	string value, out, url;
     	std::time_t result;
