@@ -5,14 +5,18 @@
 #include <assert.h>
 
 #include "DB_Instance.h"
+#include <mutex>
 
 using namespace rocksdb;
 using namespace std;
+
+std::mutex num_mutex;
 
 namespace fs = boost::filesystem;
 
 // Map to maintain the log files
 std::map<std::string, bool> logMap;
+
 
 #define DTTMFMT "%Y-%m-%d %H:%M:%S "
 #define DTTMSZ 21
@@ -31,7 +35,7 @@ bool take_backup(int timeToSleep) {
 // META DATA file craeted for system
 std::ofstream outfile;
 
-void dynamic_backup(DB *db, int timeToWait) {
+void dynamic_backup(DB *db, int timeToWait, BackupEngine* backup_engine) {
     Status s;
     std::time_t result;
 
@@ -40,30 +44,11 @@ void dynamic_backup(DB *db, int timeToWait) {
     map<string,bool>::const_iterator it;
     string fileName;
 
-	cout << "Creating backupable engine :";
-	result = std::time(nullptr);
-    cout <<  std::asctime(std::localtime(&result)) << "\n";	
-
-	BackupEngine* backup_engine;
-    s = BackupEngine::Open(Env::Default(), BackupableDBOptions("/nfs/general/backup"), &backup_engine);
-    assert(s.ok());
-
-	result = std::time(nullptr);
-    cout << "Started taking backup at : ";
-    cout <<  std::asctime(std::localtime(&result));
-	cout << "\n";
-	s = backup_engine->CreateNewBackup(db, true);
-	assert(s.ok());
-
-    result = std::time(nullptr);
-    cout << "Taking backup finished at : ";
-    cout << std::asctime(std::localtime(&result));
-	cout << "\n";
-
-	cout << "Can start operation now\n" << std::flush;	
 	
 	while(1) {
+		num_mutex.lock();
         while (take_backup(timeToWait) == false);
+		num_mutex.unlock();
 
 		result = std::time(nullptr);
         cout << "Started taking backup at : ";

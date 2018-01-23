@@ -46,9 +46,6 @@ static char *getDtTm (char *buff) {
     return buff;
 }
 
-
-
-
 // XXX: TODO: DO it based on yuquan's modeling
 bool take_backup(int timeToSleep) {
     std::this_thread::sleep_for(std::chrono::seconds(timeToSleep));
@@ -96,9 +93,7 @@ void dynamic_backup(DB *db, int timeToWait) {
         cout << "Taking backup finished at : ";
         cout << std::asctime(std::localtime(&result));
 
-		
-        cout << "\n";
-	
+        cout << "\n";	
         // write in file backup number and time to take that backup
 	string path = "/tmp/chetan/archive";
 	if (boost::filesystem::is_directory(path) == false) {

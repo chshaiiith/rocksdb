@@ -17,7 +17,6 @@
 #include "DB_Instance.h"
 #include <iostream>
 
-
 using namespace std;
 using namespace Pistache;
 
@@ -196,8 +195,11 @@ class MyHandler : public Http::Handler {
 
 int main(int argc, char *argv[]) {
     Port port(9080);
+	Status s;
 
-    int thr = 10;
+	std::time_t result;
+    
+	int thr = 10;
 
     if (argc >= 2) {
         port = std::stol(argv[1]);
@@ -213,9 +215,34 @@ int main(int argc, char *argv[]) {
     cout << "Using " << thr << " threads" << endl;
 
 	_dbInstance = new DB_Instance(true);
-	// Backup thread     
-	std::thread t1(dynamic_backup, _dbInstance->db, _dbInstance->timeToWait);
+	
+	/* Creating the backupable engine and take initial backup */
+	cout << "Creating backupable engine :";
+	result = std::time(nullptr);
+    cout <<  std::asctime(std::localtime(&result)) << "\n";	
 
+	BackupEngine* backup_engine;
+    s = BackupEngine::Open(Env::Default(), BackupableDBOptions("/nfs/general/backup"), &backup_engine);
+    assert(s.ok());
+
+	result = std::time(nullptr);
+    cout << "Started taking backup at : ";
+    cout <<  std::asctime(std::localtime(&result));
+	cout << "\n";
+	s = backup_engine->CreateNewBackup(_dbInstance->db, true);
+	assert(s.ok());
+
+    result = std::time(nullptr);
+    cout << "Taking backup finished at : ";
+    cout << std::asctime(std::localtime(&result));
+	cout << "\n";
+
+	cout << "Can start operation now\n" << std::flush;
+	
+	// Backup thread     
+	std::thread t1(dynamic_backup, _dbInstance->db, _dbInstance->timeToWait, backup_engine);
+//	cout << "Can start operations now \n";
+	std::thread t2(dynamic_backup, _dbInstance->db, _dbInstance->timeToWait, backup_engine);
 
 	auto server = std::make_shared<Http::Endpoint>(addr);
 

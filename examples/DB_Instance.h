@@ -30,7 +30,7 @@
 using namespace rocksdb;
 using namespace std;
 
-void dynamic_backup(DB* db, int timeToWait);
+void dynamic_backup(DB* db, int timeToWait, BackupEngine *backup_engine);
 
 class DB_Instance
 {
